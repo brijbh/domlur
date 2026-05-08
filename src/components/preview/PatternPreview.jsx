@@ -75,10 +75,9 @@ function ShapeClipPath({ shape, width, height }) {
   return <polygon points="400,72 736,728 64,728" />
 }
 
-function ShapeBorder({ shape, width, height, stroke, strokeWidth, transform }) {
+function ShapeBorder({ shape, width, height, stroke, strokeWidth }) {
   return (
     <g
-      transform={transform}
       fill="none"
       stroke={stroke}
       strokeWidth={strokeWidth}
@@ -117,49 +116,48 @@ export function PatternPreview({ pattern, svgRef }) {
         >
           <defs>
             <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
-              <g transform={layoutTransform}>
-                <ShapeClipPath shape={pattern.shape} width={pattern.width} height={pattern.height} />
-              </g>
+              <ShapeClipPath shape={pattern.shape} width={pattern.width} height={pattern.height} />
             </clipPath>
           </defs>
           {pattern.background && (
             <rect width={pattern.width} height={pattern.height} fill={pattern.background} />
           )}
-          <g clipPath={`url(#${clipId})`} transform={layoutTransform}>
-            {pattern.items.map((item) => (
-              <text
-                key={item.id}
-                x={item.x}
-                y={item.y}
-                fill={item.fill ?? item.color}
-                fillOpacity={item.fillOpacity ?? item.opacity}
-                stroke={item.strokeWidth > 0 ? item.strokeColor : undefined}
-                strokeWidth={item.strokeWidth > 0 ? item.strokeWidth : undefined}
-                strokeOpacity={item.strokeWidth > 0 ? item.strokeOpacity : undefined}
-                strokeLinejoin="round"
-                paintOrder={item.renderStyle === 'outline' ? 'stroke fill' : undefined}
-                fontFamily={item.fontFamily}
-                fontSize={item.fontSize}
-                fontWeight={item.fontWeight}
-                opacity={item.fillOpacity == null ? item.opacity : undefined}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                transform={`rotate(${item.rotate} ${item.x} ${item.y})`}
-              >
-                {item.text}
-              </text>
-            ))}
+          <g transform={layoutTransform}>
+            <g clipPath={`url(#${clipId})`}>
+              {pattern.items.map((item) => (
+                <text
+                  key={item.id}
+                  x={item.x}
+                  y={item.y}
+                  fill={item.fill ?? item.color}
+                  fillOpacity={item.fillOpacity ?? item.opacity}
+                  stroke={item.strokeWidth > 0 ? item.strokeColor : undefined}
+                  strokeWidth={item.strokeWidth > 0 ? item.strokeWidth : undefined}
+                  strokeOpacity={item.strokeWidth > 0 ? item.strokeOpacity : undefined}
+                  strokeLinejoin="round"
+                  paintOrder={item.renderStyle === 'outline' ? 'stroke fill' : undefined}
+                  fontFamily={item.fontFamily}
+                  fontSize={item.fontSize}
+                  fontWeight={item.fontWeight}
+                  opacity={item.fillOpacity == null ? item.opacity : undefined}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  transform={`rotate(${item.rotate} ${item.x} ${item.y})`}
+                >
+                  {item.text}
+                </text>
+              ))}
+            </g>
+            {borderWidth > 0 && (
+              <ShapeBorder
+                shape={pattern.shape}
+                width={pattern.width}
+                height={pattern.height}
+                stroke={borderColor}
+                strokeWidth={borderWidth}
+              />
+            )}
           </g>
-          {borderWidth > 0 && (
-            <ShapeBorder
-              shape={pattern.shape}
-              width={pattern.width}
-              height={pattern.height}
-              stroke={borderColor}
-              strokeWidth={borderWidth}
-              transform={layoutTransform}
-            />
-          )}
         </svg>
       </div>
     </div>

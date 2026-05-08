@@ -1158,58 +1158,76 @@ function getRenderingSettings(rendering) {
 }
 
 function getLayoutSettings(layout) {
-  if (layout === 'framed') {
+  const createLayout = ({ id, scale, x, y, densityMultiplier, bleedMultiplier }) => {
+    const width = CANVAS_SIZE * scale
+    const height = CANVAS_SIZE * scale
+
     return {
+      id,
+      scale,
+      x,
+      y,
+      width,
+      height,
+      centerX: x + width / 2,
+      centerY: y + height / 2,
+      densityMultiplier,
+      bleedMultiplier,
+    }
+  }
+
+  if (layout === 'framed') {
+    return createLayout({
       id: 'framed',
       scale: 0.88,
       x: 48,
       y: 48,
       densityMultiplier: 0.94,
       bleedMultiplier: 0.72,
-    }
+    })
   }
 
   if (layout === 'centered') {
-    return {
+    return createLayout({
       id: 'centered',
       scale: 0.74,
       x: 104,
       y: 104,
       densityMultiplier: 0.82,
       bleedMultiplier: 0.48,
-    }
+    })
   }
 
   if (layout === 'poster') {
-    return {
+    return createLayout({
       id: 'poster',
       scale: 0.9,
       x: 40,
       y: 26,
       densityMultiplier: 0.92,
       bleedMultiplier: 0.8,
-    }
+    })
   }
 
   if (layout === 'gallery') {
-    return {
+    return createLayout({
       id: 'gallery',
       scale: 0.62,
       x: 152,
       y: 152,
       densityMultiplier: 0.68,
       bleedMultiplier: 0.28,
-    }
+    })
   }
 
-  return {
+  return createLayout({
     id: 'fullBleed',
     scale: 1,
     x: 0,
     y: 0,
     densityMultiplier: 1,
     bleedMultiplier: 1,
-  }
+  })
 }
 
 function getRenderLayer(random, rendering, isHero, isBoundary) {
@@ -1632,6 +1650,51 @@ function createHeroItems({
   return items
 }
 
+function createFallbackItems({ textTokens, textColors, fontMode }) {
+  const color = textColors[0] ?? '#12355B'
+
+  return [
+    {
+      id: 'fallback-hero',
+      text: getToken(textTokens, 0),
+      x: CENTER,
+      y: CENTER,
+      rotate: 0,
+      color,
+      fontFamily: fontMode.families[0],
+      fontSize: 54,
+      fontWeight: 800,
+      opacity: 0.9,
+      fill: color,
+      fillOpacity: 0.9,
+      strokeColor: color,
+      strokeOpacity: 0,
+      strokeWidth: 0,
+      renderStyle: 'fill',
+      layer: 4,
+    },
+    {
+      id: 'fallback-accent',
+      text: getToken(textTokens, 0),
+      x: CENTER,
+      y: CENTER + 82,
+      rotate: -8,
+      color,
+      fontFamily: fontMode.families[0],
+      fontSize: 28,
+      fontWeight: 700,
+      opacity: 0.64,
+      fill: color,
+      fillOpacity: 0.64,
+      strokeColor: color,
+      strokeOpacity: 0,
+      strokeWidth: 0,
+      renderStyle: 'fill',
+      layer: 3,
+    },
+  ]
+}
+
 function getHeroAnchors(shape, fillStyle, compositionField, random) {
   if (compositionField.type === 'burst') {
     return [
@@ -1772,11 +1835,14 @@ export function generatePattern({
       ? LIGHT_BACKGROUND
       : theme.colors[4]
 
-  const items = [
+  const generatedItems = [
     ...createHeroItems(baseOptions),
     ...createCandidateItems(baseOptions),
     ...createBoundaryItems(baseOptions),
   ].sort((itemA, itemB) => itemA.layer - itemB.layer)
+  const items = generatedItems.length > 0
+    ? generatedItems
+    : createFallbackItems({ textTokens, textColors, fontMode })
 
   return {
     width: CANVAS_SIZE,
