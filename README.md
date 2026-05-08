@@ -20,6 +20,7 @@ https://github.com/brijbh/domlur
 - Fill styles for Soft, Edge, and Bleed pattern behavior
 - Background modes for theme, light paper, and transparent output
 - Export sizes from 800 x 800 px through 3200 x 3200 px
+- Optional shape-aware borders for sticker, badge, and print-style exports
 - Icon-based orientation and density controls
 - Icon-based export size control
 - Accordion-based control organization for a shorter sidebar
@@ -55,7 +56,7 @@ Fill styles control how typography occupies the selected shape. Soft keeps the p
 
 Orientation and density use compact icon controls to keep the panel lighter while preserving accessible labels and help text.
 
-Background modes control whether the SVG uses the selected theme background, a light paper background, or no background for transparent PNG export. Export size controls PNG resolution while the SVG design coordinate system remains 800 x 800.
+Background modes control whether the SVG uses the selected theme background, a light paper background, or no background for transparent PNG export. Export size controls PNG resolution while the SVG design coordinate system remains 800 x 800. Optional borders follow the selected shape silhouette and export with the PNG.
 
 The control panel is organized into Content, Shape, Style, Pattern, and Export accordion sections. On desktop, the controls scroll inside the panel while the main preview remains visible.
 

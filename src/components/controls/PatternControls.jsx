@@ -36,6 +36,7 @@ const helpText = {
   preset: 'Applies a ready-made creative style. You can still adjust the controls after selecting one.',
   theme: 'Chooses the five-color palette used for text and background.',
   background: 'Controls whether the pattern uses the theme background, a light paper background, or transparent export.',
+  border: 'Adds an optional outline around the selected shape. Useful for stickers, badges, and print exports.',
   fontStyle: 'Changes the type style used in the pattern.',
   orientation: 'Controls the direction and rotation of repeated text.',
   density: 'Controls how tightly text fills the selected shape.',
@@ -203,6 +204,7 @@ export function PatternControls({
   onRegenerate,
   onSurprise,
   backgroundModes,
+  borders,
   themes,
   shapes,
   fontModes,
@@ -311,26 +313,6 @@ export function PatternControls({
             </select>
             <ThemeDots colors={selectedTheme.colors} />
           </div>
-
-          <fieldset className="field-group">
-            <legend>
-              <SectionLabel label="Background" help={helpText.background} />
-            </legend>
-            <div className="compact-options three-options">
-              {backgroundModes.map((backgroundMode) => (
-                <label key={backgroundMode.id} className="compact-chip">
-                  <input
-                    type="radio"
-                    name="backgroundMode"
-                    value={backgroundMode.id}
-                    checked={settings.backgroundMode === backgroundMode.id}
-                    onChange={(event) => onChange('backgroundMode', event.target.value)}
-                  />
-                  <span>{backgroundMode.name}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
 
           <fieldset className="field-group">
             <legend>
@@ -547,6 +529,26 @@ export function PatternControls({
         >
           <fieldset className="field-group">
             <legend>
+              <SectionLabel label="Background" help={helpText.background} />
+            </legend>
+            <div className="compact-options three-options">
+              {backgroundModes.map((backgroundMode) => (
+                <label key={backgroundMode.id} className="compact-chip">
+                  <input
+                    type="radio"
+                    name="backgroundMode"
+                    value={backgroundMode.id}
+                    checked={settings.backgroundMode === backgroundMode.id}
+                    onChange={(event) => onChange('backgroundMode', event.target.value)}
+                  />
+                  <span>{backgroundMode.name}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="field-group">
+            <legend>
               <SectionLabel label="Export Size" help={helpText.exportSize} />
             </legend>
             <div className="icon-options four-options">
@@ -567,6 +569,26 @@ export function PatternControls({
                   <span>
                     <img src={exportSizeIcons[exportSize.id]} alt="" aria-hidden="true" />
                   </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="field-group">
+            <legend>
+              <SectionLabel label="Border" help={helpText.border} />
+            </legend>
+            <div className="compact-options four-options">
+              {borders.map((border) => (
+                <label key={border.id} className="compact-chip">
+                  <input
+                    type="radio"
+                    name="border"
+                    value={border.id}
+                    checked={settings.border === border.id}
+                    onChange={(event) => onChange('border', event.target.value)}
+                  />
+                  <span>{border.name}</span>
                 </label>
               ))}
             </div>

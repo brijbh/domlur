@@ -1433,6 +1433,7 @@ export function generatePattern({
   fontMode,
   orientation,
   density,
+  border,
   sizeMix = 'balanced',
   repeatMode = 'full',
   fillStyle = 'soft',
@@ -1492,6 +1493,7 @@ export function generatePattern({
     seed,
     backgroundMode,
     background,
+    border: border ?? { id: 'off', name: 'Off', width: 0 },
     items: [
       ...createHeroItems(baseOptions),
       ...createCandidateItems(baseOptions),

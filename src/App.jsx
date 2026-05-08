@@ -5,6 +5,7 @@ import { PatternPreview } from './components/preview/PatternPreview.jsx'
 import { themes } from './data/themes.js'
 import { shapes } from './data/shapes.js'
 import { backgroundModes } from './data/backgroundModes.js'
+import { borders } from './data/borders.js'
 import { fontModes } from './data/fonts.js'
 import { orientations } from './data/orientations.js'
 import { densities } from './data/densities.js'
@@ -22,6 +23,7 @@ const defaultSettings = {
   shape: shapes[0].id,
   theme: themes[0].id,
   backgroundMode: 'theme',
+  border: 'off',
   fontMode: fontModes[0].id,
   orientation: orientations[0].id,
   preset: 'clean',
@@ -89,6 +91,7 @@ function App() {
           fontModes.find((mode) => mode.id === patternSettings.fontMode) ?? fontModes[0],
         density:
           densities.find((density) => density.id === patternSettings.density) ?? densities[1],
+        border: borders.find((border) => border.id === patternSettings.border) ?? borders[0],
       }),
     [patternSettings],
   )
@@ -161,6 +164,12 @@ function App() {
         { value: 'light', weight: 0.2 },
         { value: 'transparent', weight: 0.08 },
       ]),
+      border: pickWeighted(random, [
+        { value: 'off', weight: 0.7 },
+        { value: 'thin', weight: 0.15 },
+        { value: 'medium', weight: 0.1 },
+        { value: 'bold', weight: 0.05 },
+      ]),
       fontMode: pickRandom(random, fontModes).id,
       orientation: random() < 0.38 ? pickRandom(random, orientations).id : preset.settings.orientation,
       density: random() < 0.34 ? pickRandom(random, densities).id : preset.settings.density,
@@ -212,6 +221,7 @@ function App() {
           onChange={updateDraft}
           onGenerate={handleGenerate}
           backgroundModes={backgroundModes}
+          borders={borders}
           themes={themes}
           shapes={shapes}
           fontModes={fontModes}

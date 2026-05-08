@@ -1,6 +1,49 @@
 import { useId } from 'react'
 import { shapePaths, shapePolygons } from '../../data/shapes.js'
 
+function hexToRgb(hex) {
+  const normalizedHex = hex.replace('#', '')
+  const value = Number.parseInt(normalizedHex, 16)
+
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255,
+  }
+}
+
+function getRelativeLuminance(hex) {
+  const { r, g, b } = hexToRgb(hex)
+  const channels = [r, g, b].map((channel) => {
+    const normalized = channel / 255
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4
+  })
+
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+}
+
+function getContrastRatio(color, background) {
+  const colorLuminance = getRelativeLuminance(color)
+  const backgroundLuminance = getRelativeLuminance(background)
+  const lighter = Math.max(colorLuminance, backgroundLuminance)
+  const darker = Math.min(colorLuminance, backgroundLuminance)
+
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+function getBorderColor(pattern) {
+  const fallback = '#12355B'
+  const themeColor = pattern.items[0]?.color ?? fallback
+
+  if (!pattern.background) {
+    return themeColor || fallback
+  }
+
+  return getContrastRatio(themeColor, pattern.background) >= 1.8 ? themeColor : fallback
+}
+
 function ShapeClipPath({ shape, width, height }) {
   const centerX = width / 2
   const centerY = height / 2
@@ -32,6 +75,22 @@ function ShapeClipPath({ shape, width, height }) {
   return <polygon points="400,72 736,728 64,728" />
 }
 
+function ShapeBorder({ shape, width, height, stroke, strokeWidth }) {
+  return (
+    <g
+      fill="none"
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      vectorEffect="non-scaling-stroke"
+      pointerEvents="none"
+    >
+      <ShapeClipPath shape={shape} width={width} height={height} />
+    </g>
+  )
+}
+
 export function PatternPreview({ pattern, svgRef }) {
   const reactId = useId()
   const clipId = `domlur-shape-clip-${pattern.seed ?? reactId}`.replaceAll(':', '')
@@ -39,6 +98,8 @@ export function PatternPreview({ pattern, svgRef }) {
   const frameClassName = `preview-frame ${
     pattern.backgroundMode === 'transparent' ? 'preview-frame-transparent' : ''
   }`
+  const borderWidth = pattern.border?.width ?? 0
+  const borderColor = getBorderColor(pattern)
 
   return (
     <div className="preview-card">
@@ -78,6 +139,15 @@ export function PatternPreview({ pattern, svgRef }) {
               </text>
             ))}
           </g>
+          {borderWidth > 0 && (
+            <ShapeBorder
+              shape={pattern.shape}
+              width={pattern.width}
+              height={pattern.height}
+              stroke={borderColor}
+              strokeWidth={borderWidth}
+            />
+          )}
         </svg>
       </div>
     </div>
