@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { shapePaths, shapePolygons } from '../../data/shapes.js'
 
 function ShapeClipPath({ shape, width, height }) {
   const centerX = width / 2
@@ -20,6 +21,14 @@ function ShapeClipPath({ shape, width, height }) {
     return <polygon points="400,48 752,400 400,752 48,400" />
   }
 
+  if (shapePolygons[shape]) {
+    return <polygon points={shapePolygons[shape]} />
+  }
+
+  if (shapePaths[shape]) {
+    return <path d={shapePaths[shape]} />
+  }
+
   return <polygon points="400,72 736,728 64,728" />
 }
 
@@ -27,9 +36,13 @@ export function PatternPreview({ pattern, svgRef }) {
   const reactId = useId()
   const clipId = `domlur-shape-clip-${pattern.seed ?? reactId}`.replaceAll(':', '')
 
+  const frameClassName = `preview-frame ${
+    pattern.backgroundMode === 'transparent' ? 'preview-frame-transparent' : ''
+  }`
+
   return (
     <div className="preview-card">
-      <div className="preview-frame">
+      <div className={frameClassName}>
         <svg
           ref={svgRef}
           className="pattern-svg"
@@ -43,7 +56,9 @@ export function PatternPreview({ pattern, svgRef }) {
               <ShapeClipPath shape={pattern.shape} width={pattern.width} height={pattern.height} />
             </clipPath>
           </defs>
-          <rect width={pattern.width} height={pattern.height} fill={pattern.background} />
+          {pattern.background && (
+            <rect width={pattern.width} height={pattern.height} fill={pattern.background} />
+          )}
           <g clipPath={`url(#${clipId})`}>
             {pattern.items.map((item) => (
               <text

@@ -1,18 +1,25 @@
-export async function downloadSvgAsPng(svgElement, fileName = 'domlur-pattern.png') {
+export async function downloadSvgAsPng(
+  svgElement,
+  fileName = 'domlur-pattern.png',
+  exportSize = 800,
+) {
   if (!svgElement) {
     throw new Error('Pattern preview is not available.')
   }
 
   const serializer = new XMLSerializer()
-  const svgText = serializer.serializeToString(svgElement)
+  const svgClone = svgElement.cloneNode(true)
+  svgClone.setAttribute('width', '800')
+  svgClone.setAttribute('height', '800')
+  const svgText = serializer.serializeToString(svgClone)
   const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' })
   const url = URL.createObjectURL(svgBlob)
 
   try {
     const image = await loadImage(url)
     const canvas = document.createElement('canvas')
-    canvas.width = 800
-    canvas.height = 800
+    canvas.width = exportSize
+    canvas.height = exportSize
 
     const context = canvas.getContext('2d')
     context.drawImage(image, 0, 0, canvas.width, canvas.height)

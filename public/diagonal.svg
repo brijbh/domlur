@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 50 50">
+  <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <line class="st0" x1="6.09" y1="27.95" x2="20.52" y2="10.52"/>
+      <path d="M24.37,5.87c-1,2.86-1.86,6.72-1.79,9.62l-2.57-4.36-4.76-1.71c2.86-.47,6.49-2.04,9.11-3.55h.01Z"/>
+    </g>
+    <g>
+      <line class="st0" x1="21.56" y1="43.54" x2="20.09" y2="20.96"/>
+      <path d="M19.7,14.93c1.24,2.77,3.26,6.16,5.3,8.23l-4.86-1.41-4.64,2.02c1.76-2.3,3.32-5.94,4.19-8.83h0Z"/>
+    </g>
+    <g>
+      <line class="st0" x1="25.63" y1="44.13" x2="40.06" y2="26.69"/>
+      <path d="M43.91,22.05c-1,2.86-1.86,6.72-1.79,9.62l-2.57-4.36-4.76-1.71c2.86-.47,6.49-2.04,9.11-3.55h0Z"/>
+    </g>
+  </g>
+  <rect class="st0" x="1.39" y="1.75" width="47.21" height="46.5" rx="4" ry="4"/>
+</svg>
