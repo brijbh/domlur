@@ -293,6 +293,170 @@ function getCompositionField(composition, random) {
   }
 }
 
+function getFlowField(flow, random) {
+  if (flow === 'circular') {
+    return {
+      type: 'circular',
+      centerX: CENTER + randomBetween(random, -28, 28),
+      centerY: CENTER + randomBetween(random, -28, 28),
+      phase: randomBetween(random, 0, Math.PI * 2),
+      ringSize: randomBetween(random, 62, 88),
+    }
+  }
+
+  if (flow === 'spiral') {
+    return {
+      type: 'spiral',
+      centerX: CENTER + randomBetween(random, -36, 36),
+      centerY: CENTER + randomBetween(random, -36, 36),
+      phase: randomBetween(random, 0, Math.PI * 2),
+      twist: random() > 0.5 ? 1 : -1,
+      ringSize: randomBetween(random, 72, 104),
+    }
+  }
+
+  if (flow === 'wave') {
+    return {
+      type: 'wave',
+      angle: pickRandom(random, [-24, 0, 22, 34]),
+      frequency: randomBetween(random, 0.012, 0.018),
+      amplitude: randomBetween(random, 62, 98),
+      phase: randomBetween(random, 0, Math.PI * 2),
+      bandSize: randomBetween(random, 52, 74),
+    }
+  }
+
+  if (flow === 'radial') {
+    return {
+      type: 'radial',
+      centerX: CENTER + randomBetween(random, -34, 34),
+      centerY: CENTER + randomBetween(random, -34, 34),
+      rayCount: pickRandom(random, [6, 7, 8, 10]),
+      phase: randomBetween(random, 0, Math.PI * 2),
+    }
+  }
+
+  if (flow === 'drift') {
+    return {
+      type: 'drift',
+      angle: pickRandom(random, [-34, -18, 0, 18, 32, 48]),
+      phase: randomBetween(random, 0, Math.PI * 2),
+      frequency: randomBetween(random, 0.006, 0.011),
+    }
+  }
+
+  return {
+    type: 'free',
+  }
+}
+
+function radiansToDegrees(angle) {
+  return (angle * 180) / Math.PI
+}
+
+function degreesToRadians(angle) {
+  return (angle * Math.PI) / 180
+}
+
+function blendAngles(angleA, angleB, weightB) {
+  const radiansA = degreesToRadians(angleA)
+  const radiansB = degreesToRadians(angleB)
+  const x = Math.cos(radiansA) * (1 - weightB) + Math.cos(radiansB) * weightB
+  const y = Math.sin(radiansA) * (1 - weightB) + Math.sin(radiansB) * weightB
+
+  return radiansToDegrees(Math.atan2(y, x))
+}
+
+function getFlowVector(x, y, flowField) {
+  const dx = x - (flowField.centerX ?? CENTER)
+  const dy = y - (flowField.centerY ?? CENTER)
+  const angle = Math.atan2(dy, dx)
+  const distanceFromCenter = Math.hypot(dx, dy)
+
+  if (flowField.type === 'circular') {
+    const ring = Math.sin(distanceFromCenter / flowField.ringSize + flowField.phase)
+    return {
+      angle: radiansToDegrees(angle + Math.PI / 2),
+      strength: 0.72 + Math.abs(ring) * 0.28,
+      band: 0.58 + Math.abs(ring) * 0.54,
+    }
+  }
+
+  if (flowField.type === 'spiral') {
+    const spiral = angle + flowField.twist * distanceFromCenter * 0.012
+    const band = Math.sin(distanceFromCenter / flowField.ringSize + angle * flowField.twist + flowField.phase)
+    return {
+      angle: radiansToDegrees(spiral + Math.PI / 3),
+      strength: 0.76 + Math.abs(band) * 0.24,
+      band: 0.55 + Math.abs(band) * 0.58,
+    }
+  }
+
+  if (flowField.type === 'wave') {
+    const rotated = getRotatedPoint(x, y, -flowField.angle)
+    const wave = Math.sin(rotated.x * flowField.frequency + flowField.phase)
+    const targetY = wave * flowField.amplitude
+    const bandDistance = Math.abs(rotated.y - targetY)
+    const slope = Math.cos(rotated.x * flowField.frequency + flowField.phase) *
+      flowField.amplitude *
+      flowField.frequency
+
+    return {
+      angle: flowField.angle + radiansToDegrees(Math.atan(slope)),
+      strength: 0.74,
+      band: clamp(1.16 - bandDistance / flowField.bandSize, 0.18, 1.16),
+    }
+  }
+
+  if (flowField.type === 'radial') {
+    const ray = Math.abs(Math.sin(angle * flowField.rayCount + flowField.phase))
+    return {
+      angle: radiansToDegrees(angle),
+      strength: 0.84,
+      band: 0.5 + ray * 0.65,
+    }
+  }
+
+  if (flowField.type === 'drift') {
+    const driftWave = Math.sin((x + y) * flowField.frequency + flowField.phase)
+    return {
+      angle: flowField.angle + driftWave * 12,
+      strength: 0.58,
+      band: 0.72 + Math.abs(driftWave) * 0.34,
+    }
+  }
+
+  return {
+    angle: 0,
+    strength: 0,
+    band: 1,
+  }
+}
+
+function getFlowPlacementBias(x, y, flowField) {
+  if (flowField.type === 'free') {
+    return 1
+  }
+
+  return clamp(getFlowVector(x, y, flowField).band, 0.16, 1.18)
+}
+
+function applyFlowToPoint(point, random, flowField) {
+  if (flowField.type === 'free') {
+    return point
+  }
+
+  const vector = getFlowVector(point.x, point.y, flowField)
+  const angle = degreesToRadians(vector.angle)
+  const along = randomBetween(random, -18, 18) * vector.strength
+  const cross = randomBetween(random, -34, 34) * (1 - vector.strength * 0.34)
+
+  return {
+    x: point.x + Math.cos(angle) * along + Math.cos(angle + Math.PI / 2) * cross,
+    y: point.y + Math.sin(angle) * along + Math.sin(angle + Math.PI / 2) * cross,
+  }
+}
+
 function getDensityBias(x, y, compositionField, shape) {
   const dx = x - CENTER
   const dy = y - CENTER
@@ -334,43 +498,50 @@ function getCandidatePoint({
   cellHeight,
   fillSettings,
   compositionField,
+  flowField,
 }) {
+  let point
+
   if (compositionField.type === 'diagonal') {
     const travel = randomBetween(random, 54, CANVAS_SIZE - 54)
     const bandOffset = randomBetween(random, -compositionField.bandWidth, compositionField.bandWidth)
     const jitter = randomBetween(random, -18, 18)
 
     if (compositionField.direction === 1) {
-      return {
+      point = {
         x: travel + bandOffset * 0.5 + jitter,
         y: travel - bandOffset * 0.5 - jitter,
       }
+      return applyFlowToPoint(point, random, flowField)
     }
 
-    return {
+    point = {
       x: travel + bandOffset * 0.5 + jitter,
       y: CANVAS_SIZE - travel + bandOffset * 0.5 - jitter,
     }
+    return applyFlowToPoint(point, random, flowField)
   }
 
   if (compositionField.type === 'burst') {
     const angle = randomBetween(random, 0, Math.PI * 2)
     const radius = random() ** 1.65 * 390
 
-    return {
+    point = {
       x: compositionField.centerX + Math.cos(angle) * radius,
       y: compositionField.centerY + Math.sin(angle) * radius,
     }
+    return applyFlowToPoint(point, random, flowField)
   }
 
   if (compositionField.type === 'edge') {
     const angle = randomBetween(random, 0, Math.PI * 2)
     const radius = randomBetween(random, 250, 390)
 
-    return {
+    point = {
       x: CENTER + Math.cos(angle) * radius + randomBetween(random, -18, 18),
       y: CENTER + Math.sin(angle) * radius + randomBetween(random, -18, 18),
     }
+    return applyFlowToPoint(point, random, flowField)
   }
 
   if (compositionField.type === 'asymmetric') {
@@ -382,19 +553,22 @@ function getCandidatePoint({
           y: CENTER + (compositionField.dominant.y > CENTER ? -95 : 95),
         }
 
-    return {
+    point = {
       x: anchor.x + randomBetween(random, -190, 190),
       y: anchor.y + randomBetween(random, -170, 170),
     }
+    return applyFlowToPoint(point, random, flowField)
   }
 
   const baseX = cellWidth * col + cellWidth / 2
   const baseY = cellHeight * row + cellHeight / 2
 
-  return {
+  point = {
     x: baseX + randomBetween(random, -cellWidth * fillSettings.fillJitter, cellWidth * fillSettings.fillJitter),
     y: baseY + randomBetween(random, -cellHeight * fillSettings.fillJitter, cellHeight * fillSettings.fillJitter),
   }
+
+  return applyFlowToPoint(point, random, flowField)
 }
 
 function getEdgeDistanceRatio(x, y, shape) {
@@ -930,6 +1104,7 @@ function createItem({
   sizeMix,
   fillSettings,
   compositionField,
+  flowField,
   isHero,
   isBoundary = false,
 }) {
@@ -949,18 +1124,20 @@ function createItem({
   const compositionRotation = isHero || fillSettings.compositionMode !== 'balanced'
     ? getCompositionRotation(x, y, compositionField)
     : null
+  const baseRotation = compositionRotation ??
+    getRotation(random, orientation, fillSettings.rotationScale, isHero)
+  const flowVector = getFlowVector(x, y, flowField)
+  const flowWeight = isHero ? 0.72 : isBoundary ? 0.62 : flowVector.strength * 0.68
+  const rotation = flowField.type === 'free'
+    ? baseRotation
+    : blendAngles(baseRotation, flowVector.angle, flowWeight)
 
   return {
     id,
     text: getToken(textTokens, tokenIndex),
     x: Math.round(x),
     y: Math.round(y),
-    rotate: Number(
-      (
-        compositionRotation ??
-        getRotation(random, orientation, fillSettings.rotationScale, isHero)
-      ).toFixed(2),
-    ),
+    rotate: Number(rotation.toFixed(2)),
     color: pickRandom(random, colors),
     fontFamily: pickRandom(random, fontMode.families),
     fontSize,
@@ -978,6 +1155,7 @@ function createCandidateItems({
   bleedAllowance,
   quietZones,
   compositionField,
+  flowField,
   colors,
   fontMode,
   sizeMix,
@@ -1001,6 +1179,7 @@ function createCandidateItems({
         cellHeight,
         fillSettings,
         compositionField,
+        flowField,
       })
 
       if (!isPointInsideShape(x, y, CANVAS_SIZE, shape, bleedAllowance)) {
@@ -1008,6 +1187,10 @@ function createCandidateItems({
       }
 
       if (random() > getDensityBias(x, y, compositionField, shape)) {
+        continue
+      }
+
+      if (random() > getFlowPlacementBias(x, y, flowField)) {
         continue
       }
 
@@ -1029,6 +1212,7 @@ function createCandidateItems({
           sizeMix,
           fillSettings,
           compositionField,
+          flowField,
           isHero: false,
         }),
       )
@@ -1047,6 +1231,7 @@ function createBoundaryItems({
   bleedAllowance,
   quietZones,
   compositionField,
+  flowField,
   colors,
   fontMode,
   sizeMix,
@@ -1070,6 +1255,10 @@ function createBoundaryItems({
       continue
     }
 
+    if (random() > getFlowPlacementBias(x, y, flowField) + 0.16) {
+      continue
+    }
+
     if (fillSettings.fillStyle === 'soft' && isInsideQuietZone(x, y, quietZones)) {
       continue
     }
@@ -1088,6 +1277,7 @@ function createBoundaryItems({
         sizeMix,
         fillSettings,
         compositionField,
+        flowField,
         isHero: false,
         isBoundary: true,
       }),
@@ -1108,6 +1298,7 @@ function createHeroItems({
   sizeMix,
   fillSettings,
   compositionField,
+  flowField,
 }) {
   const items = []
   const heroItemCount = getHeroItemCount(
@@ -1157,6 +1348,7 @@ function createHeroItems({
         sizeMix,
         fillSettings,
         compositionField,
+        flowField,
         isHero: true,
       }),
     )
@@ -1246,10 +1438,12 @@ export function generatePattern({
   fillStyle = 'soft',
   preset = 'clean',
   composition = 'balanced',
+  flow = 'free',
   seed = 12345,
 }) {
   const random = createSeededRandom(seed)
   const compositionField = getCompositionField(composition, random)
+  const flowField = getFlowField(flow, random)
   const textTokens = getTextTokens(text, repeatMode)
   const heroTextTokens = getHeroTextTokens(text, repeatMode, preset)
   const textColors = getTextColors(theme)
@@ -1279,6 +1473,7 @@ export function generatePattern({
     bleedAllowance: fillSettings.bleedAllowance,
     quietZones,
     compositionField,
+    flowField,
     colors: textColors,
     fontMode,
     sizeMix,

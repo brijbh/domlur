@@ -9,6 +9,7 @@ import { fontModes } from './data/fonts.js'
 import { orientations } from './data/orientations.js'
 import { densities } from './data/densities.js'
 import { compositions } from './data/compositions.js'
+import { flows } from './data/flows.js'
 import { exportSizes } from './data/exportSizes.js'
 import { fillStyles } from './data/fillStyles.js'
 import { presets } from './data/presets.js'
@@ -26,6 +27,7 @@ const defaultSettings = {
   preset: 'clean',
   density: 'balanced',
   composition: 'balanced',
+  flow: 'free',
   sizeMix: 'balanced',
   repeatMode: 'full',
   fillStyle: 'soft',
@@ -163,6 +165,7 @@ function App() {
       orientation: random() < 0.38 ? pickRandom(random, orientations).id : preset.settings.orientation,
       density: random() < 0.34 ? pickRandom(random, densities).id : preset.settings.density,
       composition: random() < 0.42 ? pickRandom(random, compositions).id : preset.settings.composition,
+      flow: random() < 0.48 ? pickRandom(random, flows).id : preset.settings.flow,
       sizeMix: random() < 0.34 ? pickRandom(random, sizeMixes).id : preset.settings.sizeMix,
       repeatMode: random() < 0.28 ? pickRandom(random, repeatModes).id : preset.settings.repeatMode,
       fillStyle: random() < 0.34 ? pickRandom(random, fillStyles).id : preset.settings.fillStyle,
@@ -215,6 +218,7 @@ function App() {
           orientations={orientations}
           densities={densities}
           compositions={compositions}
+          flows={flows}
           fillStyles={fillStyles}
           exportSizes={exportSizes}
           presets={presets}

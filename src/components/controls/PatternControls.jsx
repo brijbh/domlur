@@ -40,6 +40,7 @@ const helpText = {
   orientation: 'Controls the direction and rotation of repeated text.',
   density: 'Controls how tightly text fills the selected shape.',
   composition: 'Controls the overall spatial arrangement and visual flow of the generated pattern.',
+  flow: 'Controls the directional movement and rhythm of the generated typography pattern.',
   sizeMix: 'Controls how much variation appears between small, medium, and large text.',
   repeat: 'Controls whether the pattern repeats the full text, individual words, or letters.',
   fillStyle: 'Controls how the pattern uses the shape boundary: soft, edge-focused, or clipped bleed.',
@@ -208,6 +209,7 @@ export function PatternControls({
   orientations,
   densities,
   compositions,
+  flows,
   fillStyles,
   exportSizes,
   presets,
@@ -451,6 +453,26 @@ export function PatternControls({
                     onChange={(event) => onChange('composition', event.target.value)}
                   />
                   <span>{composition.name}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="field-group">
+            <legend>
+              <SectionLabel label="Flow" help={helpText.flow} />
+            </legend>
+            <div className="compact-options three-options">
+              {flows.map((flow) => (
+                <label key={flow.id} className="compact-chip">
+                  <input
+                    type="radio"
+                    name="flow"
+                    value={flow.id}
+                    checked={settings.flow === flow.id}
+                    onChange={(event) => onChange('flow', event.target.value)}
+                  />
+                  <span>{flow.name}</span>
                 </label>
               ))}
             </div>

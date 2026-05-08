@@ -14,6 +14,7 @@ https://github.com/brijbh/domlur
 - Horizontal, vertical, diagonal, and mixed orientation modes
 - Pattern density control
 - Composition modes: Balanced, Diagonal, Burst, Edge, and Asymmetric
+- Flow fields: Free, Circular, Spiral, Wave, Radial, and Drift
 - Text size mix control
 - Creative pattern presets: Clean, Poster, Textile, Minimal, and Chaos
 - Fill styles for Soft, Edge, and Bleed pattern behavior
@@ -44,9 +45,11 @@ npm run build
 
 ## Creative Controls
 
-Pattern presets update density, composition, size mix, orientation, repeat mode, and fill style as a creative starting point. They do not lock the controls, so each setting can still be tweaked manually after choosing a preset.
+Pattern presets update density, composition, flow, size mix, orientation, repeat mode, and fill style as a creative starting point. They do not lock the controls, so each setting can still be tweaked manually after choosing a preset.
 
 Composition modes control the spatial arrangement of the pattern. Balanced keeps an even layout, Diagonal creates directional movement, Burst builds from a central focal point, Edge emphasizes the silhouette, and Asymmetric creates a stronger editorial imbalance.
+
+Flow fields add directional rhythm to typography. Free keeps placement loose, Circular creates orbiting movement, Spiral builds a swirl, Wave forms flowing bands, Radial pushes outward from the center, and Drift adds calm directional motion.
 
 Fill styles control how typography occupies the selected shape. Soft keeps the pattern calmer with more whitespace, Edge emphasizes the outer silhouette, and Bleed pushes type past the shape boundary so the SVG clip path creates a poster-like crop.
 
