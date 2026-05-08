@@ -1091,6 +1091,240 @@ function getOpacity(random, isHero, isBoundary, fontSize) {
   return Number(randomBetween(random, 0.45, maxOpacity).toFixed(2))
 }
 
+function getRenderingSettings(rendering) {
+  if (rendering === 'layered') {
+    return {
+      densityMultiplier: 1.04,
+      heroScale: 1.06,
+      opacityScale: 0.86,
+      outlineChance: 0.14,
+      textureChance: 0.34,
+      strokeBase: 1.2,
+    }
+  }
+
+  if (rendering === 'stencil') {
+    return {
+      densityMultiplier: 0.68,
+      heroScale: 1.24,
+      opacityScale: 1.08,
+      outlineChance: 0.04,
+      textureChance: 0.08,
+      strokeBase: 0,
+    }
+  }
+
+  if (rendering === 'outline') {
+    return {
+      densityMultiplier: 0.92,
+      heroScale: 1.08,
+      opacityScale: 0.94,
+      outlineChance: 0.34,
+      textureChance: 0.12,
+      strokeBase: 1.35,
+    }
+  }
+
+  if (rendering === 'ghost') {
+    return {
+      densityMultiplier: 0.84,
+      heroScale: 0.92,
+      opacityScale: 0.52,
+      outlineChance: 0.18,
+      textureChance: 0.42,
+      strokeBase: 0.85,
+    }
+  }
+
+  if (rendering === 'ink') {
+    return {
+      densityMultiplier: 1.08,
+      heroScale: 1.02,
+      opacityScale: 1.08,
+      outlineChance: 0.08,
+      textureChance: 0.26,
+      strokeBase: 0.65,
+    }
+  }
+
+  return {
+    densityMultiplier: 1,
+    heroScale: 1,
+    opacityScale: 1,
+    outlineChance: 0,
+    textureChance: 0,
+    strokeBase: 0,
+  }
+}
+
+function getLayoutSettings(layout) {
+  if (layout === 'framed') {
+    return {
+      id: 'framed',
+      scale: 0.88,
+      x: 48,
+      y: 48,
+      densityMultiplier: 0.94,
+      bleedMultiplier: 0.72,
+    }
+  }
+
+  if (layout === 'centered') {
+    return {
+      id: 'centered',
+      scale: 0.74,
+      x: 104,
+      y: 104,
+      densityMultiplier: 0.82,
+      bleedMultiplier: 0.48,
+    }
+  }
+
+  if (layout === 'poster') {
+    return {
+      id: 'poster',
+      scale: 0.9,
+      x: 40,
+      y: 26,
+      densityMultiplier: 0.92,
+      bleedMultiplier: 0.8,
+    }
+  }
+
+  if (layout === 'gallery') {
+    return {
+      id: 'gallery',
+      scale: 0.62,
+      x: 152,
+      y: 152,
+      densityMultiplier: 0.68,
+      bleedMultiplier: 0.28,
+    }
+  }
+
+  return {
+    id: 'fullBleed',
+    scale: 1,
+    x: 0,
+    y: 0,
+    densityMultiplier: 1,
+    bleedMultiplier: 1,
+  }
+}
+
+function getRenderLayer(random, rendering, isHero, isBoundary) {
+  if (isHero) {
+    return rendering === 'layered' && random() < 0.24 ? 2 : 4
+  }
+
+  if (isBoundary) {
+    return 3
+  }
+
+  if (rendering === 'layered' || rendering === 'ink') {
+    return weightedPick(random, [
+      { value: 1, weight: 0.34 },
+      { value: 2, weight: 0.42 },
+      { value: 3, weight: 0.24 },
+    ])
+  }
+
+  if (rendering === 'ghost') {
+    return weightedPick(random, [
+      { value: 1, weight: 0.52 },
+      { value: 2, weight: 0.34 },
+      { value: 3, weight: 0.14 },
+    ])
+  }
+
+  return 2
+}
+
+function getRenderingStyle({
+  random,
+  rendering,
+  color,
+  colors,
+  opacity,
+  fontSize,
+  fontWeight,
+  isHero,
+  isBoundary,
+  layer,
+  renderingSettings,
+}) {
+  let renderStyle = 'fill'
+  let fill = color
+  let fillOpacity = opacity
+  let strokeColor = color
+  let strokeOpacity = 0
+  let strokeWidth = 0
+  let resolvedFontWeight = fontWeight
+
+  if (rendering === 'stencil') {
+    fillOpacity = isHero ? clamp(opacity * 1.1, 0.72, 1) : randomBetween(random, 0.76, 0.98)
+    resolvedFontWeight = isHero ? 900 : weightedPick(random, [
+      { value: 800, weight: 0.55 },
+      { value: 900, weight: 0.45 },
+    ])
+  }
+
+  if (rendering === 'layered') {
+    fillOpacity = clamp(opacity * (layer === 1 ? 0.46 : layer === 2 ? 0.68 : 0.9), 0.18, 0.96)
+    if (!isHero && random() < renderingSettings.textureChance) {
+      renderStyle = 'texture'
+      fillOpacity = randomBetween(random, 0.16, 0.34)
+    }
+  }
+
+  if (rendering === 'ghost') {
+    fillOpacity = randomBetween(random, isHero ? 0.28 : 0.14, isHero ? 0.54 : 0.42)
+    resolvedFontWeight = isHero ? 700 : weightedPick(random, [
+      { value: 500, weight: 0.5 },
+      { value: 600, weight: 0.34 },
+      { value: 700, weight: 0.16 },
+    ])
+  }
+
+  if (rendering === 'ink') {
+    fillOpacity = randomBetween(random, isHero ? 0.78 : 0.52, isHero ? 1 : 0.92)
+    if (!isHero && !isBoundary && random() < 0.18) {
+      strokeOpacity = randomBetween(random, 0.16, 0.34)
+      strokeWidth = randomBetween(random, 0.35, 0.9)
+    }
+  }
+
+  const shouldOutline = rendering === 'outline'
+    ? random() < (isHero ? 0.72 : renderingSettings.outlineChance)
+    : random() < renderingSettings.outlineChance && (isHero || fontSize > 34)
+
+  if (shouldOutline) {
+    renderStyle = 'outline'
+    fill = rendering === 'outline' && random() < (isHero ? 0.78 : 0.52) ? 'none' : color
+    fillOpacity = fill === 'none' ? 0 : clamp(fillOpacity * 0.45, 0.14, 0.48)
+    strokeColor = color
+    strokeOpacity = rendering === 'ghost' ? randomBetween(random, 0.24, 0.42) : randomBetween(random, 0.55, 0.92)
+    strokeWidth = Math.max(0.7, Math.min(3.2, fontSize / 34 + renderingSettings.strokeBase))
+  }
+
+  if (rendering === 'layered' && isHero && random() < 0.32) {
+    strokeColor = pickRandom(random, colors)
+    strokeOpacity = randomBetween(random, 0.18, 0.36)
+    strokeWidth = randomBetween(random, 0.8, 1.8)
+  }
+
+  return {
+    fill,
+    fillOpacity: Number(clamp(fillOpacity, 0.08, 1).toFixed(2)),
+    strokeColor,
+    strokeOpacity: Number(clamp(strokeOpacity, 0, 1).toFixed(2)),
+    strokeWidth: Number(strokeWidth.toFixed(2)),
+    renderStyle,
+    layer,
+    fontWeight: resolvedFontWeight,
+  }
+}
+
 function createItem({
   id,
   textTokens,
@@ -1121,6 +1355,18 @@ function createItem({
     fontSize = Math.round(fontSize * edgeScale)
   }
 
+  if (isHero) {
+    fontSize = Math.round(fontSize * fillSettings.renderingSettings.heroScale)
+  }
+
+  if (fillSettings.rendering === 'stencil' && !isHero) {
+    fontSize = Math.round(fontSize * randomBetween(random, 1.08, 1.28))
+  }
+
+  if (fillSettings.rendering === 'ghost') {
+    fontSize = Math.round(fontSize * randomBetween(random, 0.9, 1.06))
+  }
+
   const compositionRotation = isHero || fillSettings.compositionMode !== 'balanced'
     ? getCompositionRotation(x, y, compositionField)
     : null
@@ -1132,17 +1378,46 @@ function createItem({
     ? baseRotation
     : blendAngles(baseRotation, flowVector.angle, flowWeight)
 
+  const color = pickRandom(random, colors)
+  const opacity = clamp(
+    getOpacity(random, isHero, isBoundary, fontSize) * fillSettings.renderingSettings.opacityScale,
+    0.08,
+    1,
+  )
+  const layer = getRenderLayer(random, fillSettings.rendering, isHero, isBoundary)
+  const fontWeight = getFontWeight(random, isHero, isBoundary)
+  const renderingStyle = getRenderingStyle({
+    random,
+    rendering: fillSettings.rendering,
+    color,
+    colors,
+    opacity,
+    fontSize,
+    fontWeight,
+    isHero,
+    isBoundary,
+    layer,
+    renderingSettings: fillSettings.renderingSettings,
+  })
+
   return {
     id,
     text: getToken(textTokens, tokenIndex),
     x: Math.round(x),
     y: Math.round(y),
     rotate: Number(rotation.toFixed(2)),
-    color: pickRandom(random, colors),
+    color,
     fontFamily: pickRandom(random, fontMode.families),
     fontSize,
-    fontWeight: getFontWeight(random, isHero, isBoundary),
-    opacity: getOpacity(random, isHero, isBoundary, fontSize),
+    fontWeight: renderingStyle.fontWeight,
+    opacity,
+    fill: renderingStyle.fill,
+    fillOpacity: renderingStyle.fillOpacity,
+    strokeColor: renderingStyle.strokeColor,
+    strokeOpacity: renderingStyle.strokeOpacity,
+    strokeWidth: renderingStyle.strokeWidth,
+    renderStyle: renderingStyle.renderStyle,
+    layer: renderingStyle.layer,
   }
 }
 
@@ -1434,6 +1709,8 @@ export function generatePattern({
   orientation,
   density,
   border,
+  layout = 'fullBleed',
+  rendering = 'clean',
   sizeMix = 'balanced',
   repeatMode = 'full',
   fillStyle = 'soft',
@@ -1450,6 +1727,8 @@ export function generatePattern({
   const textColors = getTextColors(theme)
   const presetSettings = getPresetSettings(preset)
   const fillSettings = getFillSettings(fillStyle)
+  const renderingSettings = getRenderingSettings(rendering)
+  const layoutSettings = getLayoutSettings(layout)
   fillSettings.presetSettings = presetSettings
   fillSettings.presetHeroScale = presetSettings.heroScale
   fillSettings.rotationScale *= presetSettings.rotationScale
@@ -1458,8 +1737,15 @@ export function generatePattern({
   fillSettings.preset = preset
   fillSettings.compositionMode = composition
   fillSettings.shape = shape
+  fillSettings.rendering = rendering
+  fillSettings.renderingSettings = renderingSettings
+  fillSettings.bleedAllowance *= layoutSettings.bleedMultiplier
   const resolvedDensity = clamp(
-    (density?.value ?? DEFAULT_DENSITY) * fillSettings.densityMultiplier * presetSettings.densityMultiplier,
+    (density?.value ?? DEFAULT_DENSITY) *
+      fillSettings.densityMultiplier *
+      presetSettings.densityMultiplier *
+      renderingSettings.densityMultiplier *
+      layoutSettings.densityMultiplier,
     0.28,
     0.96,
   )
@@ -1486,6 +1772,12 @@ export function generatePattern({
       ? LIGHT_BACKGROUND
       : theme.colors[4]
 
+  const items = [
+    ...createHeroItems(baseOptions),
+    ...createCandidateItems(baseOptions),
+    ...createBoundaryItems(baseOptions),
+  ].sort((itemA, itemB) => itemA.layer - itemB.layer)
+
   return {
     width: CANVAS_SIZE,
     height: CANVAS_SIZE,
@@ -1493,11 +1785,9 @@ export function generatePattern({
     seed,
     backgroundMode,
     background,
+    rendering,
+    layout: layoutSettings,
     border: border ?? { id: 'off', name: 'Off', width: 0 },
-    items: [
-      ...createHeroItems(baseOptions),
-      ...createCandidateItems(baseOptions),
-      ...createBoundaryItems(baseOptions),
-    ],
+    items,
   }
 }

@@ -75,9 +75,10 @@ function ShapeClipPath({ shape, width, height }) {
   return <polygon points="400,72 736,728 64,728" />
 }
 
-function ShapeBorder({ shape, width, height, stroke, strokeWidth }) {
+function ShapeBorder({ shape, width, height, stroke, strokeWidth, transform }) {
   return (
     <g
+      transform={transform}
       fill="none"
       stroke={stroke}
       strokeWidth={strokeWidth}
@@ -100,6 +101,8 @@ export function PatternPreview({ pattern, svgRef }) {
   }`
   const borderWidth = pattern.border?.width ?? 0
   const borderColor = getBorderColor(pattern)
+  const layout = pattern.layout ?? { scale: 1, x: 0, y: 0 }
+  const layoutTransform = `translate(${layout.x ?? 0} ${layout.y ?? 0}) scale(${layout.scale ?? 1})`
 
   return (
     <div className="preview-card">
@@ -113,24 +116,32 @@ export function PatternPreview({ pattern, svgRef }) {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <clipPath id={clipId}>
-              <ShapeClipPath shape={pattern.shape} width={pattern.width} height={pattern.height} />
+            <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+              <g transform={layoutTransform}>
+                <ShapeClipPath shape={pattern.shape} width={pattern.width} height={pattern.height} />
+              </g>
             </clipPath>
           </defs>
           {pattern.background && (
             <rect width={pattern.width} height={pattern.height} fill={pattern.background} />
           )}
-          <g clipPath={`url(#${clipId})`}>
+          <g clipPath={`url(#${clipId})`} transform={layoutTransform}>
             {pattern.items.map((item) => (
               <text
                 key={item.id}
                 x={item.x}
                 y={item.y}
-                fill={item.color}
+                fill={item.fill ?? item.color}
+                fillOpacity={item.fillOpacity ?? item.opacity}
+                stroke={item.strokeWidth > 0 ? item.strokeColor : undefined}
+                strokeWidth={item.strokeWidth > 0 ? item.strokeWidth : undefined}
+                strokeOpacity={item.strokeWidth > 0 ? item.strokeOpacity : undefined}
+                strokeLinejoin="round"
+                paintOrder={item.renderStyle === 'outline' ? 'stroke fill' : undefined}
                 fontFamily={item.fontFamily}
                 fontSize={item.fontSize}
                 fontWeight={item.fontWeight}
-                opacity={item.opacity}
+                opacity={item.fillOpacity == null ? item.opacity : undefined}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 transform={`rotate(${item.rotate} ${item.x} ${item.y})`}
@@ -146,6 +157,7 @@ export function PatternPreview({ pattern, svgRef }) {
               height={pattern.height}
               stroke={borderColor}
               strokeWidth={borderWidth}
+              transform={layoutTransform}
             />
           )}
         </svg>

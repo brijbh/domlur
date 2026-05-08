@@ -13,8 +13,10 @@ import { compositions } from './data/compositions.js'
 import { flows } from './data/flows.js'
 import { exportSizes } from './data/exportSizes.js'
 import { fillStyles } from './data/fillStyles.js'
+import { layoutModes } from './data/layoutModes.js'
 import { presets } from './data/presets.js'
 import { repeatModes } from './data/repeatModes.js'
+import { renderingModes } from './data/renderingModes.js'
 import { sizeMixes } from './data/sizeMixes.js'
 import { generatePattern } from './engine/generatePattern.js'
 
@@ -24,12 +26,14 @@ const defaultSettings = {
   theme: themes[0].id,
   backgroundMode: 'theme',
   border: 'off',
+  layout: 'fullBleed',
   fontMode: fontModes[0].id,
   orientation: orientations[0].id,
   preset: 'clean',
   density: 'balanced',
   composition: 'balanced',
   flow: 'free',
+  rendering: 'clean',
   sizeMix: 'balanced',
   repeatMode: 'full',
   fillStyle: 'soft',
@@ -170,11 +174,13 @@ function App() {
         { value: 'medium', weight: 0.1 },
         { value: 'bold', weight: 0.05 },
       ]),
+      layout: random() < 0.38 ? pickRandom(random, layoutModes).id : preset.settings.layout,
       fontMode: pickRandom(random, fontModes).id,
       orientation: random() < 0.38 ? pickRandom(random, orientations).id : preset.settings.orientation,
       density: random() < 0.34 ? pickRandom(random, densities).id : preset.settings.density,
       composition: random() < 0.42 ? pickRandom(random, compositions).id : preset.settings.composition,
       flow: random() < 0.48 ? pickRandom(random, flows).id : preset.settings.flow,
+      rendering: random() < 0.44 ? pickRandom(random, renderingModes).id : preset.settings.rendering,
       sizeMix: random() < 0.34 ? pickRandom(random, sizeMixes).id : preset.settings.sizeMix,
       repeatMode: random() < 0.28 ? pickRandom(random, repeatModes).id : preset.settings.repeatMode,
       fillStyle: random() < 0.34 ? pickRandom(random, fillStyles).id : preset.settings.fillStyle,
@@ -230,10 +236,12 @@ function App() {
           compositions={compositions}
           flows={flows}
           fillStyles={fillStyles}
+          layoutModes={layoutModes}
           exportSizes={exportSizes}
           presets={presets}
           sizeMixes={sizeMixes}
           repeatModes={repeatModes}
+          renderingModes={renderingModes}
           onPresetSelect={handlePresetSelect}
           onRegenerate={handleRegenerate}
           onSurprise={handleSurprise}

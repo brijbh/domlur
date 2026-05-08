@@ -15,6 +15,8 @@ https://github.com/brijbh/domlur
 - Pattern density control
 - Composition modes: Balanced, Diagonal, Burst, Edge, and Asymmetric
 - Flow fields: Free, Circular, Spiral, Wave, Radial, and Drift
+- Rendering modes: Clean, Layered, Stencil, Outline, Ghost, and Ink
+- Layout modes: Full Bleed, Framed, Centered, Poster, and Gallery
 - Text size mix control
 - Creative pattern presets: Clean, Poster, Textile, Minimal, and Chaos
 - Fill styles for Soft, Edge, and Bleed pattern behavior
@@ -52,11 +54,15 @@ Composition modes control the spatial arrangement of the pattern. Balanced keeps
 
 Flow fields add directional rhythm to typography. Free keeps placement loose, Circular creates orbiting movement, Spiral builds a swirl, Wave forms flowing bands, Radial pushes outward from the center, and Drift adds calm directional motion.
 
+Rendering modes change the print style of the composition. Clean stays crisp, Layered builds collage-like depth, Stencil creates bold poster forms, Outline mixes stroked and filled typography, Ghost creates soft atmospheric output, and Ink emphasizes darker print-like accumulation.
+
 Fill styles control how typography occupies the selected shape. Soft keeps the pattern calmer with more whitespace, Edge emphasizes the outer silhouette, and Bleed pushes type past the shape boundary so the SVG clip path creates a poster-like crop.
 
 Orientation and density use compact icon controls to keep the panel lighter while preserving accessible labels and help text.
 
 Background modes control whether the SVG uses the selected theme background, a light paper background, or no background for transparent PNG export. Export size controls PNG resolution while the SVG design coordinate system remains 800 x 800. Optional borders follow the selected shape silhouette and export with the PNG.
+
+Layout modes control how the artwork sits inside the export canvas. Full Bleed keeps the current edge-to-edge energy, Framed adds print-ready margin, Centered creates calm editorial whitespace, Poster adds vertical graphic emphasis, and Gallery creates a smaller floating artwork with generous whitespace.
 
 The control panel is organized into Content, Shape, Style, Pattern, and Export accordion sections. On desktop, the controls scroll inside the panel while the main preview remains visible.
 

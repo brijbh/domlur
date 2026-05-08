@@ -37,11 +37,13 @@ const helpText = {
   theme: 'Chooses the five-color palette used for text and background.',
   background: 'Controls whether the pattern uses the theme background, a light paper background, or transparent export.',
   border: 'Adds an optional outline around the selected shape. Useful for stickers, badges, and print exports.',
+  layout: 'Controls how the artwork is framed and positioned within the export canvas.',
   fontStyle: 'Changes the type style used in the pattern.',
   orientation: 'Controls the direction and rotation of repeated text.',
   density: 'Controls how tightly text fills the selected shape.',
   composition: 'Controls the overall spatial arrangement and visual flow of the generated pattern.',
   flow: 'Controls the directional movement and rhythm of the generated typography pattern.',
+  rendering: 'Controls the visual print/rendering style of the typography composition.',
   sizeMix: 'Controls how much variation appears between small, medium, and large text.',
   repeat: 'Controls whether the pattern repeats the full text, individual words, or letters.',
   fillStyle: 'Controls how the pattern uses the shape boundary: soft, edge-focused, or clipped bleed.',
@@ -213,10 +215,12 @@ export function PatternControls({
   compositions,
   flows,
   fillStyles,
+  layoutModes,
   exportSizes,
   presets,
   sizeMixes,
   repeatModes,
+  renderingModes,
 }) {
   const selectedTheme = themes.find((theme) => theme.id === settings.theme) ?? themes[0]
   const [openSections, setOpenSections] = useState({
@@ -462,6 +466,26 @@ export function PatternControls({
 
           <fieldset className="field-group">
             <legend>
+              <SectionLabel label="Rendering" help={helpText.rendering} />
+            </legend>
+            <div className="compact-options three-options">
+              {renderingModes.map((renderingMode) => (
+                <label key={renderingMode.id} className="compact-chip">
+                  <input
+                    type="radio"
+                    name="rendering"
+                    value={renderingMode.id}
+                    checked={settings.rendering === renderingMode.id}
+                    onChange={(event) => onChange('rendering', event.target.value)}
+                  />
+                  <span>{renderingMode.name}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="field-group">
+            <legend>
               <SectionLabel label="Size Mix" help={helpText.sizeMix} />
             </legend>
             <div className="compact-options four-options">
@@ -527,6 +551,26 @@ export function PatternControls({
           isOpen={openSections.export}
           onToggle={() => toggleSection('export')}
         >
+          <fieldset className="field-group">
+            <legend>
+              <SectionLabel label="Layout" help={helpText.layout} />
+            </legend>
+            <div className="compact-options five-options">
+              {layoutModes.map((layoutMode) => (
+                <label key={layoutMode.id} className="compact-chip">
+                  <input
+                    type="radio"
+                    name="layout"
+                    value={layoutMode.id}
+                    checked={settings.layout === layoutMode.id}
+                    onChange={(event) => onChange('layout', event.target.value)}
+                  />
+                  <span>{layoutMode.name}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <fieldset className="field-group">
             <legend>
               <SectionLabel label="Background" help={helpText.background} />
