@@ -8,6 +8,21 @@ repo: https://github.com/brijbh/domlur
 ## Summary
 DOMLUR is a mobile-first, browser-only React + Vite app that turns words, names, quotes, and phrases into decorative SVG typography patterns (shape clipping, themes, flow fields, composition/rendering modes) and exports them as PNG.
 
+## Tech stack
+- JavaScript (React 19, JSX — no TypeScript compilation, despite `@types/react` dev deps for editor support)
+- Vite 8 (dev server/build), `@vitejs/plugin-react`
+- ESLint 10 with `eslint-plugin-react-hooks` / `eslint-plugin-react-refresh`
+- No backend/auth — static client-only app; README notes it's friendly to GitHub Pages hosting, though no deploy config is present yet
+
+## Run locally
+```
+npm install
+npm run dev       # start Vite dev server
+npm run build     # production build
+npm run preview   # preview the production build
+npm run lint      # eslint
+```
+
 ## Recent progress
 - Built out a large creative feature set: 12 shape options, 5 color themes, multiple orientation/composition/flow-field/rendering/layout modes, seeded regeneration, a "Surprise Me" randomizer, and PNG export up to 3200x3200.
 - Fixed a layout-mode pattern rendering regression.
